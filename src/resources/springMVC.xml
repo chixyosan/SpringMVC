@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd">
+		
+	<!-- 配置自动扫描的包，组件扫描 -->
+	<context:component-scan base-package="com.zefeng">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service" />
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository" />
+	</context:component-scan>
+	
+	<!-- 静态资源交给默认的Servlet -->
+	<mvc:default-servlet-handler />
+	
+	<mvc:resources mapping="/images/**" location="/images/" />
+	<mvc:resources mapping="/js/**" location="/js/" />
+	<mvc:resources mapping="/style/**" location="/style/" />
+	<mvc:resources mapping="/img/**" location="/img/" />
+	
+	<!--  <mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**" />
+			<mvc:exclude-mapping path="/images/**" />
+			<bean class="com.zefeng.ssh.interceptor.LoginInterceptor" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+	 -->
+	
+	 <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" /> 
+	
+	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandleAdapter">
+		<property name="cacheSeconds" value="0" />
+		<property name="messageConverters">
+			<list>
+				<ref bean="mappingJacksonHttpMessageConverter" />
+				<ref bean="mappingStringHttpMessageConverter" />
+			</list>
+		</property>
+		<property name="webBindingInitializer" ref="webBindingInitializer"></property>
+	</bean>
+	
+	<bean id="mappingStringHttpMessageConverter" class="org.springframework.http.converter.StringHttpMessageConverter" >
+		<property name="supportedMediaTypes">
+			<list>
+				<value>text/plain;charset=UTF-8</value>
+				<value>application/json;charset=UTF-8</value>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="mapingJacksonHttpMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+		<property name="supportedMediaTypes">
+			<list>
+				<bean class="org.springframework.http.MediaType">
+					<constructor-arg index="0" value="application"></constructor-arg>
+					<constructor-arg index="1" value="json"></constructor-arg>
+					<constructor-arg index="2" value="UTF-8"></constructor-arg>
+				</bean>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="webBindInitializer" class="org.springframework.web.bind.support.ConfigurableWebBindingInitializer">
+		<property name="conversionService">
+			<bean class="org.springframework.core.convert.support.DefaultConversionService" />
+		</property>
+	</bean>
+	
+	<!-- 配置视图解析器 如何把handler方法返回值解析为实际的物理视图 -->
+	<bean id="ViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="ingoreAcceptHeader" value="true"></property>
+		<property name="mediaType">
+			<map>
+				<entry key="json" value="application/json"></entry>
+				<entry key="xml" value="application/xml"></entry>
+			</map>
+		</property>
+		<property name="defaultContentType" value="text/html"></property>
+		<property name="favorParameter" value="false"></property>
+		<property name="ViewResolvers">
+			<list>
+				<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+					<property name="order" value="2"></property>
+					<property name="prefix" value="/WEB-INF/views"></property>
+					<property name="suffix" value=".jsp"></property>
+				</bean>
+			</list>
+		</property>
+	</bean>
+	<!-- <bean class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+		<property name="order" value="1" />
+		<property name="contentType" value="text/html;charset=UTF-8" />
+		<property name="cache" value="true" />
+		<property name="prefix" value="/WEB-INF/views" />
+		<property name="suffix" value=".ftl" />
+		<property name="requestContextAttribute" value="request" />
+		<property name="exposeRequestAttributes" value="true" />
+		<property name="exposeSessionAttributes" value="true" />
+		<property name="exposSpringMacroHelpers" value="true" />
+		<property name="allowSessionOverride" value="true" />
+	</bean> -->
+	<!-- 
+	<bean id="freemarkerConfig" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigure">
+		<property name="templateLoaderPath" value="/WEB-INF/views/" />
+		<property name="freemarkerSettings">
+			<props>
+				<prop key="template_update_delay">0</prop>
+				<prop key="default_encoding">UTF-8</prop>
+				<prop key="number_format">0.##########</prop>
+				<prop key="datetime_format">yyyy-MM-dd HH:mm:ss</prop>
+				<prop key="classic_compatible">true</prop>
+				<prop key="template_exception_handler">ignore</prop>
+			</props>
+		</property>
+	</bean> -->
+	
+	<!-- <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="104857600" />
+	</bean> -->
+	
+	<!-- 使用mvc:annotation-driven代替上面注解映射器和注解适配器配置
+		mvc:annotation-driven默认加载很多的参数绑定方法，比如json转换解析器就默认加载了，如果使用
+		mvc:annotation-driven不用配置上边的RequestMappingHandlerMapping和RequestMappingHandlerAdapter
+		实际开发时使用：mvc:annotation-driven
+	 -->
+	 
+	 <!-- <mvc:annotation-driven></mvc:annotation-driven> -->
+	
+</beans>		
+

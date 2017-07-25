@@ -1,0 +1,16 @@
+SpringMVC + Spring + Hibernate框架员工系统
+
+开发环境：
+   windows10
+   eclipse:
+   Mysql 5.6.22
+   Tomcat8
+ 
+框架版本
+
+   Spring4.3.4
+   SpringMVC4.3.4
+   Hibernate4.3.11
+   
+实现功能
+         员工的增删改查
